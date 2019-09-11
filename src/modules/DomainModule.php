@@ -70,7 +70,7 @@ class DomainModule extends AbstractModule implements ObjectModuleInterface
 
         return $domains;
 
-        unset($rows['access_od'], $rows['dummy']);
+        unset($rows['access_id'], $rows['dummy']);
         $contract = new ContractModule($this->tool);
         $contracts = $contract->contractsSearch([]);
         if (empty($contracts)) {
@@ -197,6 +197,8 @@ class DomainModule extends AbstractModule implements ObjectModuleInterface
      */
     protected function _domainPostParseRequest(array $domain) : array
     {
+        $expires = $domain['expires'];
+        unset($domain['expires']);
         return array_merge($domain, [
             'domain' => strtolower($domain['domain']),
             'statuses' => implode(",", array_filter([
@@ -205,7 +207,7 @@ class DomainModule extends AbstractModule implements ObjectModuleInterface
                 'autoprolong' => $domain['status.autoprolong'] == 1 ? 'autoprolong' : null,
             ])),
             'nameservers' => $domain['nss'] ? implode(',', $domain['nss']) : '',
-            'expiration_date' => date("Y-m-d H:i:s", strtotime($domain['expires'])),
+            'expiration_date' => date("Y-m-d H:i:s", strtotime($expires)),
         ]);
     }
 }

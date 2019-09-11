@@ -33,7 +33,7 @@ class ContractInfoRequest extends ContractAbstractRequest implements NicRuReques
         'fields' => [
             'contract-num' => 'contract',
             'phone' => 'phone',
-            'email' => 'email',
+            'e-mail' => 'email',
             'person' => 'name',
             'passport' => 'passport',
             'org' => 'organization',
