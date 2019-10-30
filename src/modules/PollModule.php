@@ -25,6 +25,40 @@ class PollModule extends AbstractModule implements ObjectModuleInterface
 {
     public function pollsGetNew($data = null)
     {
-        return true;
+        foreach (['incoming', 'outgoing', 'expired'] as $state) {
+            $domains = $this->base->domainsSearchForPolls([
+                'status' => $state === 'expired' ? 'checked4deleting' : $state,
+                'access_id' => $this->tool->data['id'],
+            ]);
+
+            if (empty($domains)) {
+                continue;
+            }
+
+            $polls = call_user_func_array([$this, "_pollsGet" . ucfirst($state) . "Message"], [$polls, $domains]);
+        }
+
+        return empty($polls) ? true : $polls;
+
+    }
+
+    protected function _pollsGetDeleteMessage($polls = [], $domains = [])
+    {
+        if (empty($domains)) {
+            return $polls;
+        }
+
+        foreach ($domains as $id => $domain) {
+            $info = $this->base->domainInfo($domain);
+            if (err::not($info)) {
+                continue ;
+            }
+
+            if (err::is($info) && strpos(err::get($info), "Object does not exist") !== false) {
+                // SET STATE
+            }
+        }
+
+        return $polls;
     }
 }

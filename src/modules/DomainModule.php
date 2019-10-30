@@ -101,7 +101,16 @@ class DomainModule extends AbstractModule implements ObjectModuleInterface
      */
     public function domainsLoadInfo(array $rows) : array
     {
-        return $rows;
+        foreach ($rows as $id => $row) {
+            $res[$id] = $this->tool->domainInfo($row);
+        }
+
+        return $res;
+    }
+
+    public function domainSaveContacts(array $row) : array
+    {
+        return $row;
     }
 
     /**
