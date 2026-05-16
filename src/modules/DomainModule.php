@@ -61,13 +61,13 @@ class DomainModule extends AbstractModule implements ObjectModuleInterface
     /**
      * Search all NIC.ru domain service objects and index the parsed result by domain name.
      *
-     * @param array $rows
+     * @param array $_rows
      * @return array
      * @throws \hiapi\nicru\exceptions\NicRuException
      */
-    public function domainsLoadNicRu($rows = []) : array
+    public function domainsLoadNicRu($_rows = []) : array
     {
-        $request = new ServicesSearchRequest($this->tool->getRequestData(), [
+        $request = $this->tool->createRequest(ServicesSearchRequest::class, [
             'service' => 'domain',
         ]);
         $result = $this->post($request);
@@ -112,7 +112,7 @@ class DomainModule extends AbstractModule implements ObjectModuleInterface
      */
     protected function domainInfo(array $row): array
     {
-        $request = new DomainInfoRequest($this->tool->getRequestData(), $row);
+        $request = $this->tool->createRequest(DomainInfoRequest::class, $row);
         $res = $this->post($request);
         return array_merge($this->_domainPostParseRequest($res), $row);
     }
@@ -136,7 +136,7 @@ class DomainModule extends AbstractModule implements ObjectModuleInterface
             }
         }
 
-        $request = new DomainUpdateRequest($this->tool->getRequestData(), $_row);
+        $request = $this->tool->createRequest(DomainUpdateRequest::class, $_row);
         $res = $this->post($request);
         $order = new OrderModule($this->tool);
         $res = $order->orderInfo(['order_id' => $res['order_id']]);
@@ -164,7 +164,7 @@ class DomainModule extends AbstractModule implements ObjectModuleInterface
      */
     protected function domainRenew(array $row) : array
     {
-        $request = new DomainRenewRequest($this->tool->getRequestData(), $row);
+        $request = $this->tool->createRequest(DomainRenewRequest::class, $row);
         $res = $this->post($request);
         $order = new OrderModule($this->tool);
         $res = $order->orderInfo(['order_id' => $res['order_id']]);
@@ -255,7 +255,7 @@ class DomainModule extends AbstractModule implements ObjectModuleInterface
             ]);
         }
 
-        $request = new DomainWPRequest($this->tool->getRequestData(), $row);
+        $request = $this->tool->createRequest(DomainWPRequest::class, $row);
         try {
             $res = $this->post($request);
         } catch (\Exception $e) {

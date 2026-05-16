@@ -12,8 +12,9 @@ namespace hiapi\nicru;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
-use hiapi\nicru\requests\AbstractRequest;
+use hiapi\nicru\exceptions\NicRuException;
 use hiapi\nicru\parsers\NicRuResponseParser;
+use hiapi\nicru\requests\AbstractRequest;
 
 /**
  * Perform GuzzleHttp request and return parsed response
@@ -43,6 +44,7 @@ class HttpClient
      * @return array
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \hiapi\nicru\exceptions\NicRuException
+     * @throws \InvalidArgumentException
      */
     public function performRequest (string  $httpMethod, AbstractRequest $request) : array
     {
@@ -98,10 +100,11 @@ class HttpClient
      *
      * @param string $httpMethod
      * @param AbstractRequest $request
-     * @return Response|null
+     * @return Response
      * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \InvalidArgumentException
      */
-    private function request (string $httpMethod, AbstractRequest $request): ?Response
+    private function request (string $httpMethod, AbstractRequest $request): Response
     {
         if (!strcasecmp($httpMethod, 'GET')) {
             return $this->fetchGet($request);
@@ -111,7 +114,7 @@ class HttpClient
             return $this->fetchPost($request);
         }
 
-        return null;
+        throw new \InvalidArgumentException("Unsupported HTTP method `$httpMethod`");
     }
 
     /**
@@ -120,12 +123,20 @@ class HttpClient
      * @param Response $guzzleResponse
      * @param AbstractRequest $request
      * @return array
-     * @throws \hiapi\nicru\exceptions\NicRuException
+     * @throws NicRuException
      */
     private function parseGuzzleResponse(Response $guzzleResponse, AbstractRequest $request)
     {
         if ($guzzleResponse->getStatusCode() !== 200) {
-            throw new \Exception(trim($guzzleResponse->getReasonPhrase()));
+            $body = trim((string) $guzzleResponse->getBody());
+            $message = sprintf(
+                'NIC.ru HTTP error %d %s%s',
+                $guzzleResponse->getStatusCode(),
+                trim($guzzleResponse->getReasonPhrase()),
+                $body === '' ? '' : ": {$body}"
+            );
+
+            throw new NicRuException($message);
         }
 
         $response = trim(mb_convert_encoding($guzzleResponse->getBody()->getContents(), 'UTF-8', 'KOI8-R'));

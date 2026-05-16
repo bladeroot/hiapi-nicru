@@ -35,7 +35,7 @@ class OrderModule extends AbstractModule implements ObjectModuleInterface
     public function orderInfo(array $row) : array
     {
         unset($row['contract']);
-        $request = new OrderInfoRequest($this->tool->getRequestData(), $row);
+        $request = $this->tool->createRequest(OrderInfoRequest::class, $row);
         $res = $this->post($request);
         if (!empty($res['order-item'])) {
             if (in_array($res['order-item']['state'], [self::STATE_FAILED, self::STATE_DELETED], true)) {
@@ -55,7 +55,7 @@ class OrderModule extends AbstractModule implements ObjectModuleInterface
      */
     public function orderCancel(array $row) : array
     {
-        $request = new OrderCancelRequest($this->tool->getRequestData(), $row);
+        $request = $this->tool->createRequest(OrderCancelRequest::class, $row);
         return $this->post($request);
     }
 }

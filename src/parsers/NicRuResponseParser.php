@@ -139,10 +139,12 @@ class NicRuResponseParser
      */
     private static function getBlockData(array $block, array $fields) : array
     {
+        $result = [];
+
         foreach ($block as $line) {
             [$field, $value] = explode(":", $line, 2);
             if (isset($fields[$field])) {
-                $result = self::setParsedValue($fields[$field], $value, $result ?? null);
+                $result = self::setParsedValue($fields[$field], $value, $result);
             }
         }
 

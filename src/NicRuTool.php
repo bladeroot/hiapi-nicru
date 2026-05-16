@@ -60,7 +60,12 @@ class NicRuTool extends \hiapi\components\AbstractTool
      */
     public function __construct($base = null, $data = null)
     {
+        if (!is_array($data)) {
+            throw new RequiredParamMissingException('`data` must be given for NicRuTool');
+        }
+
         parent::__construct($base, $data);
+
         foreach (['url','login','password'] as $key) {
             if (empty($data[$key])) {
                 throw new RequiredParamMissingException("`$key` must be given for NicRuTool");
@@ -103,13 +108,35 @@ class NicRuTool extends \hiapi\components\AbstractTool
     }
 
     /**
-     * Return NIC.ru request credentials for internal request builders.
+     * Create a NIC.ru request with the tool credentials kept inside the tool.
      *
-     * @return array
+     * @param string $class
+     * @param array $args
+     * @return AbstractRequest
      */
-    public function getRequestData(): array
+    public function createRequest(string $class, array $args): AbstractRequest
     {
-        return $this->data;
+        return new $class($this->data, $args);
+    }
+
+    /**
+     * Return the non-secret access identifier used for poll lookups.
+     *
+     * @return mixed|null
+     */
+    public function getAccessId()
+    {
+        return $this->data['id'] ?? null;
+    }
+
+    /**
+     * Return the non-secret client name used in poll messages.
+     *
+     * @return mixed|null
+     */
+    public function getClientName()
+    {
+        return $this->data['name'] ?? null;
     }
 
     /**
