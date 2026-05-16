@@ -13,7 +13,7 @@ namespace hiapi\nicru\requests\domain;
 use hiapi\nicru\requests\NicRuRequestInterface;
 
 /**
- * Domain renew request composet.
+ * Domain renew request composer.
  *
  * @author Yurii Myronchuk <bladeroot@gmail.com>
  */

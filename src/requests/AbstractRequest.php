@@ -40,6 +40,13 @@ abstract class AbstractRequest implements NicRuRequestInterface
     /* @var string */
     protected $search = null;
 
+    /**
+     * Build the textual NIC.ru SimpleRequest from credentials, headers, and body fields.
+     *
+     * @param array $data
+     * @param array $args
+     * @throws RequiredParamMissingException
+     */
     public function __construct($data, $args)
     {
         $this->data = $data;
@@ -76,13 +83,19 @@ abstract class AbstractRequest implements NicRuRequestInterface
         $this->setRequestBodyVariables($args);
     }
 
+    /**
+     * Render the complete NIC.ru SimpleRequest payload.
+     *
+     * @return string
+     */
     public function __toString()
     {
         return trim(implode("\n", $this->requestArray));
     }
 
     /**
-     * @param void
+     * Return parser rules describing response blocks and fields for this request.
+     *
      * @return array
      */
     public function getParserAnswerRules() : array
@@ -91,8 +104,9 @@ abstract class AbstractRequest implements NicRuRequestInterface
     }
 
     /**
-     * @param void
-     * @return string|void
+     * Return the response block used to read search pagination metadata.
+     *
+     * @return string|null
      */
     public function getParserSearchDelimiter() : ?string
     {
@@ -100,9 +114,8 @@ abstract class AbstractRequest implements NicRuRequestInterface
     }
 
     /**
-     * Check if request is search
+     * Check whether the response should be treated as a search result list.
      *
-     * @param void
      * @return bool
      */
     public function isSearchRequest() : bool
@@ -111,9 +124,8 @@ abstract class AbstractRequest implements NicRuRequestInterface
     }
 
     /**
-     * Check if parse some additional block neaded
+     * Check whether parser must collect additional subinfo blocks.
      *
-     * @param void
      * @return bool
      */
     public function isSubInfoQueried() : bool
@@ -122,7 +134,9 @@ abstract class AbstractRequest implements NicRuRequestInterface
     }
 
     /**
-     * @param array|void $row
+     * Append dynamic body fields from method arguments to the request payload.
+     *
+     * @param array $row
      * @return void
      */
     protected function setRequestBodyVariables($row = []) : void

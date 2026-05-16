@@ -25,19 +25,19 @@ use hiapi\nicru\exceptions\RequiredParamMissingException;
  */
 class NicRuTool extends \hiapi\components\AbstractTool
 {
-    /* @var string */
+    /** @var string */
     protected $url;
 
-    /* @var string */
+    /** @var string */
     protected $login;
 
-    /* @var string */
+    /** @var string */
     protected $password;
 
-    /* @var object [[HttpClient]] */
+    /** @var HttpClient|null */
     protected $httpClient = null;
 
-    /* @var array */
+    /** @var array<string, string|ObjectModuleInterface> */
     protected $modules = [
         'domain'    => DomainModule::class,
         'domains'   => DomainModule::class,
@@ -49,6 +49,13 @@ class NicRuTool extends \hiapi\components\AbstractTool
         'contacts'  => ContactModule::class,
     ];
 
+    /**
+     * Initialize the tool with NIC.ru endpoint credentials.
+     *
+     * @param mixed $base
+     * @param array|null $data
+     * @throws RequiredParamMissingException
+     */
     public function __construct($base = null, $data = null)
     {
         parent::__construct($base, $data);
@@ -60,6 +67,14 @@ class NicRuTool extends \hiapi\components\AbstractTool
         }
     }
 
+    /**
+     * Route dynamic hiAPI commands to the module named by the command prefix.
+     *
+     * @param string $command
+     * @param array $args
+     * @return mixed
+     * @throws InvalidCallException
+     */
     public function __call($command, $args)
     {
         $parts = preg_split('/(?=[A-Z])/', $command);
@@ -69,14 +84,23 @@ class NicRuTool extends \hiapi\components\AbstractTool
         return call_user_func_array([$module, $command], $args);
     }
 
+    /**
+     * Expose protected configuration fields for request builders.
+     *
+     * @param string $name
+     * @return mixed
+     */
     public function __get($name)
     {
         return $this->{$name};
     }
 
     /**
+     * Resolve and lazily instantiate a module by entity name.
+     *
      * @param string $name
-     * @return class
+     * @return ObjectModuleInterface
+     * @throws InvalidCallException
      */
     public function getModule($name) : ObjectModuleInterface
     {
@@ -92,7 +116,7 @@ class NicRuTool extends \hiapi\components\AbstractTool
     }
 
     /**
-     * This method is for testing purpose only
+     * Replace a module instance, primarily for tests.
      *
      * @param string $name
      * @param AbstractModule $module
@@ -110,8 +134,10 @@ class NicRuTool extends \hiapi\components\AbstractTool
     }
 
     /**
-     * @param class $class
-     * @return object [[AbstractModule]]
+     * Create a module instance bound to this tool.
+     *
+     * @param string $class
+     * @return AbstractModule
      */
     public function createModule($class) : AbstractModule
     {
@@ -119,9 +145,8 @@ class NicRuTool extends \hiapi\components\AbstractTool
     }
 
     /**
-     * Getter for httpClient
+     * Return the configured HTTP client, creating the default Guzzle-backed one when needed.
      *
-     * @param void
      * @return HttpClient
      */
     public function getHttpClient(): HttpClient
@@ -134,10 +159,10 @@ class NicRuTool extends \hiapi\components\AbstractTool
     }
 
     /**
-     * Setter for httpClient
+     * Replace the HTTP client used by the tool.
      *
-     * @param object [[HttpClient]] $httpClient
-     * @return object [[NicRuTool]]
+     * @param HttpClient $httpClient
+     * @return self
      */
     public function setHttpClient(HttpClient $httpClient): self
     {
@@ -147,12 +172,15 @@ class NicRuTool extends \hiapi\components\AbstractTool
     }
 
     /**
-     * Performs http request with specified method
+     * Perform an HTTP request with the specified method.
+     *
      * Direct usage is deprecated
      *
-     * @param string $httpMethod
-     * @param object $request
+     * @param string $method
+     * @param AbstractRequest $request
      * @return array
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \hiapi\nicru\exceptions\NicRuException
      */
     public function request(string $method, AbstractRequest $request)
     {

@@ -12,7 +12,6 @@ namespace hiapi\nicru\modules;
 
 use hiapi\nicru\NicRuTool;
 use hiapi\nicru\requests\AbstractRequest;
-use hiapi\nicru\requests\OrderInfoRequest;
 use hiapi\nicru\exceptions\InvalidCallException;
 use hiapi\nicru\exceptions\InvalidObjectException;
 
@@ -25,20 +24,20 @@ abstract class AbstractModule implements ObjectModuleInterface
 {
     const ERROR_OBJECT_DOES_NOT_EXIST = 'Object does not exist';
 
-    /* @var object [[NicRuTool]] */
+    /** @var NicRuTool */
     public $tool;
-    /* @var object [[mrdpBase]] */
+    /** @var object */
     public $base;
 
-    /* @var array: list function for emulation without errors */
+    /** @var array list of functions for emulation without errors */
     static protected $emulatedFuncs = [
 //        'domainSaveContacts',
     ];
 
     /**
-     * Create a class instance
+     * Keep references to the owning tool and the base hiAPI object.
      *
-     * @param object [[NicRuTool]] $tool
+     * @param NicRuTool $tool
      */
     public function __construct(NicRuTool $tool)
     {
@@ -47,11 +46,12 @@ abstract class AbstractModule implements ObjectModuleInterface
     }
 
     /**
-     * Preprocessing module function
+     * Dispatch dynamic module methods and inject contract data when it is missing.
      *
      * @param string $method
      * @param array $args
      * @throws \hiapi\nicru\exceptions\InvalidCallException|\hiapi\nicru\exceptions\InvalidObjectException
+     * @throws \hiapi\nicru\exceptions\NicRuException
      */
     public function __call(string $method, array $args)
     {
@@ -79,7 +79,7 @@ abstract class AbstractModule implements ObjectModuleInterface
     }
 
     /**
-     * Performs http GET request
+     * Perform a raw HTTP GET request through the owning tool.
      *
      * @param array $data
      * @return array
@@ -90,10 +90,12 @@ abstract class AbstractModule implements ObjectModuleInterface
     }
 
     /**
-     * Performs http POST request
+     * Perform a composed NIC.ru POST request through the owning tool.
      *
-     * @param array $data
+     * @param AbstractRequest $request
      * @return array
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \hiapi\nicru\exceptions\NicRuException
      */
     public function post(AbstractRequest $request) : array
     {

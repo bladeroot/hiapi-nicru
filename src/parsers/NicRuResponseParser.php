@@ -23,9 +23,12 @@ class NicRuResponseParser
     const STATE_OK = 200;
 
     /**
-     * @var string $response
-     * @var object [[AbstractRequest]] $request
+     * Parse a successful NIC.ru response using the request-specific field map.
+     *
+     * @param string $response
+     * @param AbstractRequest $request
      * @return array
+     * @throws ParserErrorException
      * @throws \hiapi\nicru\exceptions\NicRuException
      * @static
      */
@@ -94,7 +97,7 @@ class NicRuResponseParser
      * Explode response to blocks
      *
      * @param string $response
-     * @return array of arrays
+     * @return array
      * @static
      */
     private static function explodeToBlocks(string $response) : array
@@ -128,6 +131,8 @@ class NicRuResponseParser
     }
 
     /**
+     * Extract mapped fields from one response block.
+     *
      * @param array $block
      * @param array $fields
      * @return array
@@ -145,6 +150,8 @@ class NicRuResponseParser
     }
 
     /**
+     * Store a parsed field value, preserving repeated fields as arrays.
+     *
      * @param string $field
      * @param string $value
      * @param array|null $res
@@ -171,6 +178,8 @@ class NicRuResponseParser
     }
 
     /**
+     * Extract search paging values such as first and limit from the response block.
+     *
      * @param array $block
      * @return array
      * @static

@@ -10,18 +10,17 @@
 
 namespace hiapi\nicru\modules;
 
-use hiapi\nicru\requests\contract\ContractInfoRequest;
-use hiapi\nicru\requests\contract\ContractsSearchRequest;
-
 /**
- * Contract operations.
+ * Contact operations.
  *
  * @author Yurii Myronchuk <bladeroot@gmail.com>
  */
 class ContactModule extends AbstractModule implements ObjectModuleInterface
 {
     /**
-     * @param array
+     * Return contact data unchanged because NIC.ru contacts are represented as contracts.
+     *
+     * @param array $row
      * @return array
      */
     public function contactInfo(array $row) : array
@@ -30,14 +29,22 @@ class ContactModule extends AbstractModule implements ObjectModuleInterface
     }
 
     /**
-     * @param array|void
+     * Return the given contact list unchanged.
+     *
+     * @param array $rows
      * @return array
      */
     public function contactsSearch($rows = []) : array
     {
-        return $row;
+        return $rows;
     }
 
+    /**
+     * Build a hiAPI contact identifier from the selected NIC.ru contract.
+     *
+     * @param array $row
+     * @return array
+     */
     protected function contactSet(array $row): array
     {
         return [

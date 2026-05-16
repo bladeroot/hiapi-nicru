@@ -24,11 +24,11 @@ use hiapi\nicru\exceptions\RequiredParamMissingException;
  */
 class HostModule extends AbstractModule implements ObjectModuleInterface
 {
-    /* @var array */
+    /** @var array */
     protected $ruZones = ['ru', 'su', 'рф', 'xn--p1ai'];
 
     /**
-     * Preprocessing module function
+     * Resolve the owning domain for host operations before normal module dispatch.
      *
      * @param string $method
      * @param array $args
@@ -50,9 +50,9 @@ class HostModule extends AbstractModule implements ObjectModuleInterface
     }
 
     /**
-     * Delete hosts
+     * Delete multiple NIC.ru host objects and keep the input array keys.
      *
-     * @param array of array $rows
+     * @param array $rows
      * @return array
      * @throws \hiapi\nicru\exceptions\NicRuException
      */
@@ -67,7 +67,7 @@ class HostModule extends AbstractModule implements ObjectModuleInterface
     }
 
     /**
-     * Get info about host
+     * Request NIC.ru host details and annotate whether the host exists.
      *
      * @param array $row
      * @return array
@@ -82,7 +82,7 @@ class HostModule extends AbstractModule implements ObjectModuleInterface
     }
 
     /**
-     * Set info to host
+     * Create or update a host using native server requests or domain update fallback.
      *
      * @param array $row
      * @return array
@@ -104,7 +104,7 @@ class HostModule extends AbstractModule implements ObjectModuleInterface
     }
 
     /**
-     * Delete host
+     * Delete a single NIC.ru host object.
      * @param array $row
      * @return array
      * @throws \hiapi\nicru\exceptions\NicRuException
@@ -116,7 +116,7 @@ class HostModule extends AbstractModule implements ObjectModuleInterface
     }
 
     /**
-     * Update/Create host for GTLD domains
+     * Create or update a NIC.ru host object using native server operations.
      *
      * @param array $row
      * @return array
@@ -135,7 +135,7 @@ class HostModule extends AbstractModule implements ObjectModuleInterface
     }
 
     /**
-     * Update/Create host using domainUpdate procedure
+     * Temporarily attach glue data through domain nameservers for zones without native host updates.
      *
      * @param array $row
      * @return array

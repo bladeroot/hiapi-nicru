@@ -17,32 +17,44 @@ namespace hiapi\nicru\requests;
  */
 interface NicRuRequestInterface
 {
+    /**
+     * Build a NIC.ru request from tool credentials and operation arguments.
+     *
+     * @param array $data
+     * @param array $args
+     */
     public function __construct(array $data, $args);
+
+    /**
+     * Render the request as a NIC.ru SimpleRequest payload.
+     *
+     * @return string
+     */
     public function __toString();
 
     /**
-     * @param void
+     * Return parser rules describing response blocks and fields for this request.
+     *
      * @return array
      */
     public function getParserAnswerRules() : array;
     /**
-     * @param void
-     * @return string|void
+     * Return the response block used to read search pagination metadata.
+     *
+     * @return string|null
      */
     public function getParserSearchDelimiter() : ?string;
 
     /**
-     * Check if request is search
+     * Check whether the response should be treated as a search result list.
      *
-     * @param void
      * @return bool
      */
     public function isSearchRequest() : bool;
 
     /**
-     * Check if parse some additional block neaded
+     * Check whether parser must collect additional subinfo blocks.
      *
-     * @param void
      * @return bool
      */
     public function isSubInfoQueried() : bool;

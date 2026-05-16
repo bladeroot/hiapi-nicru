@@ -22,10 +22,12 @@ use hiapi\nicru\parsers\NicRuResponseParser;
  */
 class HttpClient
 {
-    /* @var object [[Client]] */
+    /** @var Client */
     protected $client;
 
     /**
+     * Store the configured Guzzle client used for all NIC.ru calls.
+     *
      * @param Client $client
      */
     public function __construct(Client $client)
@@ -34,10 +36,13 @@ class HttpClient
     }
 
     /**
-     * Perform http request
+     * Send a composed NIC.ru request and parse the NIC.ru response body.
+     *
      * @param string $httpMethod
-     * @param object [[AbstractRequest]] $request
+     * @param AbstractRequest $request
      * @return array
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \hiapi\nicru\exceptions\NicRuException
      */
     public function performRequest (string  $httpMethod, AbstractRequest $request) : array
     {
@@ -47,18 +52,22 @@ class HttpClient
     }
 
     /**
-     * @param array $data
+     * Send the request as a URL query string.
+     *
+     * @param AbstractRequest $request
      * @return Response
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function fetchGet (AbstractRequest $request): Response
     {
-        $query = '?' . $this->prepareQuery($reuqest);
+        $query = '?' . $this->prepareQuery($request);
         return $this->client->request('GET', $query);
     }
 
     /**
-     * @param array|null $data
+     * Send the request as an x-www-form-urlencoded POST body.
+     *
+     * @param AbstractRequest $request
      * @return Response
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
@@ -74,7 +83,9 @@ class HttpClient
     }
 
     /**
-     * @param array $data
+     * Encode the textual NIC.ru SimpleRequest payload for transport.
+     *
+     * @param AbstractRequest $request
      * @return string
      */
     private function prepareQuery(AbstractRequest $request): string
@@ -83,9 +94,12 @@ class HttpClient
     }
 
     /**
+     * Dispatch the request to the transport method selected by caller.
+     *
      * @param string $httpMethod
-     * @param object [[AbstractRequest]] $request
-     * @return array|null
+     * @param AbstractRequest $request
+     * @return Response|null
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     private function request (string $httpMethod, AbstractRequest $request): ?Response
     {
@@ -101,8 +115,11 @@ class HttpClient
     }
 
     /**
+     * Convert a successful KOI8-R NIC.ru response to UTF-8 and parse it.
+     *
      * @param Response $guzzleResponse
-     * @return array|int
+     * @param AbstractRequest $request
+     * @return array
      * @throws \hiapi\nicru\exceptions\NicRuException
      */
     private function parseGuzzleResponse(Response $guzzleResponse, AbstractRequest $request)

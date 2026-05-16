@@ -10,21 +10,22 @@
 
 namespace hiapi\nicru\modules;
 
-use hiapi\nicru\requests\domain\DomainInfoRequest;
-use hiapi\nicru\requests\domain\DomainRenewRequest;
-use hiapi\nicru\requests\domain\DomainUpdateRequest;
-use hiapi\nicru\requests\domain\DomainsSearchRequest;
-use hiapi\nicru\requests\service\ServicesSearchRequest;
 use hiapi\legacy\lib\deps\err;
 
 
 /**
- * Domain operations.
+ * Poll operations.
  *
  * @author Yurii Myronchuk <bladeroot@gmail.com>
  */
 class PollModule extends AbstractModule implements ObjectModuleInterface
 {
+    /**
+     * Build hiAPI poll messages from domains that changed transfer or deletion state.
+     *
+     * @param array|null $data
+     * @return array|bool
+     */
     public function pollsGetNew($data = null)
     {
         foreach (['ok', 'expired', 'outgoing'] as $state) {
@@ -43,6 +44,13 @@ class PollModule extends AbstractModule implements ObjectModuleInterface
         return empty($polls) ? true : $polls;
     }
 
+    /**
+     * Detect domains that disappeared from NIC.ru while locally marked as active.
+     *
+     * @param array $polls
+     * @param array $domains
+     * @return array
+     */
     protected function _pollsGetOkMessage($polls = [], $domains = [])
     {
         if (empty($domains)) {
@@ -67,7 +75,14 @@ class PollModule extends AbstractModule implements ObjectModuleInterface
         return $polls;
     }
 
-    protected function _pollsGetExpiredMessage($polls = [], $domains =[])
+    /**
+     * Detect expired domains deleted at NIC.ru and mark them as deleting locally.
+     *
+     * @param array $polls
+     * @param array $domains
+     * @return array
+     */
+    protected function _pollsGetExpiredMessage($polls = [], $domains = [])
     {
         if (empty($domains)) {
             return $polls;
@@ -92,7 +107,14 @@ class PollModule extends AbstractModule implements ObjectModuleInterface
         return $polls;
     }
 
-    protected function _pollsGetOutgoingMessage($polls = [], $domains) : array
+    /**
+     * Detect outgoing transfers approved by NIC.ru.
+     *
+     * @param array $polls
+     * @param array $domains
+     * @return array
+     */
+    protected function _pollsGetOutgoingMessage($polls = [], $domains = []) : array
     {
         if (empty($domains)) {
             return $polls;
@@ -112,7 +134,14 @@ class PollModule extends AbstractModule implements ObjectModuleInterface
         return $polls;
     }
 
-
+    /**
+     * Build a hiAPI poll message payload from a domain row and event data.
+     *
+     * @param array $row
+     * @param array $data
+     * @param bool $outgoing
+     * @return array
+     */
     private function _pollBuild($row, $data, $outgoing = false) : array
     {
         return array_merge([

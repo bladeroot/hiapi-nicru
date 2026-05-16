@@ -13,7 +13,6 @@ namespace hiapi\nicru\modules;
 use hiapi\nicru\requests\domain\DomainInfoRequest;
 use hiapi\nicru\requests\domain\DomainRenewRequest;
 use hiapi\nicru\requests\domain\DomainUpdateRequest;
-use hiapi\nicru\requests\domain\DomainsSearchRequest;
 use hiapi\nicru\requests\domain\DomainWPRequest;
 use hiapi\nicru\requests\service\ServicesSearchRequest;
 
@@ -26,17 +25,13 @@ class DomainModule extends AbstractModule implements ObjectModuleInterface
 {
     const ERROR_WP_IS_NOT_AVAILABLE = 'Errors in order item templates: For this TLD service is not available.';
     const ERROR_SIMILAR_OBJECT = 'Errors in order item templates: Similar object already exists';
-    /**
-     * @param array $row
-     * @return array
-     */
+    /** @var array<int, string> */
     protected $domainStatuses = [
         0 => 'ok',
     ];
 
-    /// XXX REWRITE
     /**
-     * Get info about domains
+     * Load detailed NIC.ru info for each domain row while preserving the input keys.
      *
      * @param array $rows
      * @return array
@@ -53,7 +48,10 @@ class DomainModule extends AbstractModule implements ObjectModuleInterface
     }
 
     /**
-     * Dubt function
+     * Keep domain password data unchanged because NIC.ru password changes are not implemented here.
+     *
+     * @param array $row
+     * @return array
      */
     public function domainSetPassword(array $row) : array
     {
@@ -61,51 +59,30 @@ class DomainModule extends AbstractModule implements ObjectModuleInterface
     }
 
     /**
-     * Load info about all domain
+     * Search all NIC.ru domain service objects and index the parsed result by domain name.
      *
-     * @param array|void $rows
+     * @param array $rows
      * @return array
      * @throws \hiapi\nicru\exceptions\NicRuException
      */
     public function domainsLoadNicRu($rows = []) : array
     {
-
         $request = new ServicesSearchRequest($this->tool->data, [
             'service' => 'domain',
         ]);
         $result = $this->post($request);
+        $domains = [];
+
         foreach ($result as $info) {
             $info = $this->_domainPostParseRequest($info);
             $domains[$info['domain']] = $info;
         }
 
         return $domains;
-
-        unset($rows['access_od'], $rows['dummy']);
-        $contract = new ContractModule($this->tool);
-        $contracts = $contract->contractsSearch([]);
-        if (empty($contracts)) {
-            return [];
-        }
-
-        foreach ($contracts as $contract) {
-            $request = new DomainsSearchRequest($this->tool->data, $contract);
-            $res = $this->post($request);
-            if (empty($res) || (count($res) == 1 && !empty($res['status']))) {
-                continue;
-            }
-
-            foreach ($res as $id => $domain) {
-                $domain = $this->_domainPostParseRequest($domain);
-                $domains[$domain['domain']] = $domain;
-            }
-        }
-
-        return $domains;
     }
 
     /**
-     * Load info about domains
+     * Return preloaded domain rows unchanged.
      *
      * @param array $rows
      * @return array
@@ -116,7 +93,10 @@ class DomainModule extends AbstractModule implements ObjectModuleInterface
     }
 
     /**
-     * Empty function
+     * Return domain contact rows unchanged because bulk contact saving is handled elsewhere.
+     *
+     * @param array $rows
+     * @return array
      */
     public function domainsSaveContacts(array $rows) : array
     {
@@ -124,7 +104,7 @@ class DomainModule extends AbstractModule implements ObjectModuleInterface
     }
 
     /**
-     * Get info about domain
+     * Request one NIC.ru domain object and merge parsed fields into the original row.
      *
      * @param array $row
      * @return array
@@ -138,7 +118,7 @@ class DomainModule extends AbstractModule implements ObjectModuleInterface
     }
 
     /**
-     * Set info about domain
+     * Update NIC.ru domain data, expanding glue nameservers with IPs when needed.
      *
      * @param array $row
      * @return array
@@ -164,7 +144,7 @@ class DomainModule extends AbstractModule implements ObjectModuleInterface
     }
 
     /**
-     * Set NSs to domain
+     * Update domain nameservers through the generic domain update flow.
      *
      * @param array $row
      * @return array
@@ -176,7 +156,7 @@ class DomainModule extends AbstractModule implements ObjectModuleInterface
     }
 
     /**
-     * Renew domain
+     * Create a NIC.ru renewal order and check the resulting order state.
      *
      * @param array $row
      * @return array
@@ -192,32 +172,60 @@ class DomainModule extends AbstractModule implements ObjectModuleInterface
     }
 
     /**
-     * Enable/Disable WHOISPROXY
+     * Synchronize contact privacy by delegating to WHOIS proxy switching.
      *
      * @param array $row
      * @return array
      * @throws \hiapi\nicru\exceptions\NicRuException
      */
-    protected function domainSetContacts($row)
+    protected function domainSetContacts(array $row): array
     {
         return $this->domainSetWhoisProtect($row);
     }
 
+    /**
+     * Save domain contacts through the base hiAPI helper without forcing remote sync.
+     *
+     * @param array $row
+     * @return array
+     */
     protected function domainSaveContacts(array $row): array
     {
         return $this->base->_simple_domainSaveContacts($row, false);
     }
 
+    /**
+     * Enable NIC.ru WHOIS proxy for a domain when the TLD supports it.
+     *
+     * @param array $row
+     * @return array
+     * @throws \hiapi\nicru\exceptions\NicRuException
+     */
     protected function domainEnableWhoisProtect(array $row): array
     {
         return $this->domainSetWhoisProtect($row, true);
     }
 
+    /**
+     * Disable NIC.ru WHOIS proxy for a domain when the TLD supports it.
+     *
+     * @param array $row
+     * @return array
+     * @throws \hiapi\nicru\exceptions\NicRuException
+     */
     protected function domainDisableWhoisProtect(array $row): array
     {
         return $this->domainSetWhoisProtect($row, false);
     }
 
+    /**
+     * Buy or update the NIC.ru WHOIS proxy service for supported TLDs.
+     *
+     * @param array $row
+     * @param bool|null $enable
+     * @return array
+     * @throws \hiapi\nicru\exceptions\NicRuException
+     */
     protected function domainSetWhoisProtect(array $row, bool $enable = null): array
     {
         if (
@@ -263,7 +271,7 @@ class DomainModule extends AbstractModule implements ObjectModuleInterface
     }
 
     /**
-     * Postprocess domain info
+     * Normalize parsed NIC.ru domain fields to the hiAPI domain schema.
      *
      * @param array $domain
      * @return array

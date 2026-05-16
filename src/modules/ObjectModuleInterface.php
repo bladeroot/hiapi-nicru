@@ -22,23 +22,24 @@ use hiapi\nicru\requests\AbstractRequest;
 interface ObjectModuleInterface
 {
     /**
-     * Create a class instance
+     * Keep references to the owning tool and the base hiAPI object.
      *
-     * @param object [[NicRuTool]] $tool
+     * @param NicRuTool $tool
      */
     public function __construct(NicRuTool $tool);
 
     /**
-     * Preprocessing module function
+     * Dispatch dynamic module methods and inject contract data when it is missing.
      *
      * @param string $method
      * @param array $args
      * @throws \hiapi\nicru\exceptions\InvalidCallException|\hiapi\nicru\exceptions\InvalidObjectException
+     * @throws \hiapi\nicru\exceptions\NicRuException
      */
     public function __call(string $method, array $args);
 
     /**
-     * Performs http GET request
+     * Perform a raw HTTP GET request through the owning tool.
      *
      * @param array $data
      * @return array
@@ -46,10 +47,12 @@ interface ObjectModuleInterface
     public function get(array $data) : array;
 
     /**
-     * Performs http POST request
+     * Perform a composed NIC.ru POST request through the owning tool.
      *
-     * @param array $data
+     * @param AbstractRequest $request
      * @return array
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \hiapi\nicru\exceptions\NicRuException
      */
     public function post(AbstractRequest $request) : array;
 }

@@ -21,8 +21,11 @@ use hiapi\nicru\requests\contract\ContractsSearchRequest;
 class ContractModule extends AbstractModule implements ObjectModuleInterface
 {
     /**
-     * @param array
+     * Request NIC.ru contract details for the given contract search data.
+     *
+     * @param array $row
      * @return array
+     * @throws \hiapi\nicru\exceptions\NicRuException
      */
     public function contractInfo(array $row) : array
     {
@@ -32,12 +35,15 @@ class ContractModule extends AbstractModule implements ObjectModuleInterface
     }
 
     /**
-     * @param array|void
+     * Search NIC.ru contracts and return parsed contract rows.
+     *
+     * @param array $rows
      * @return array
+     * @throws \hiapi\nicru\exceptions\NicRuException
      */
     public function contractsSearch($rows = []) : array
     {
-        unset($row['contract']);
+        unset($rows['contract']);
         $request = new ContractsSearchRequest($this->tool->data, $rows);
         return $this->post($request);
     }

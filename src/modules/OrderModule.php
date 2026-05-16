@@ -26,7 +26,7 @@ class OrderModule extends AbstractModule implements ObjectModuleInterface
     const STATE_RUNNING = 'running';
 
     /**
-     * Get info about order
+     * Get NIC.ru order details and fail when the order item ended unsuccessfully.
      *
      * @param array $row
      * @return array
@@ -47,7 +47,7 @@ class OrderModule extends AbstractModule implements ObjectModuleInterface
     }
 
     /**
-     * Cancel order
+     * Send a NIC.ru order cancellation request.
      *
      * @param array $row
      * @return array

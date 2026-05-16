@@ -23,7 +23,7 @@ use hiapi\nicru\requests\AbstractRequest;
 use Exception;
 
 /**
- * Parse response and throws Excepions.
+ * Parse response and throws exceptions.
  *
  * @author Yurii Myronchuk <bladeroot@gmail.com>
  */
@@ -52,10 +52,10 @@ class NicRuErrorParser
     protected static $delimiter = 'errors';
 
     /**
-     * Parse response during error
+     * Parse a non-200 NIC.ru state response and throw the mapped exception.
      *
-     * @var string $response
-     * @var object [[AbstractRequest]] $request
+     * @param string $response
+     * @param AbstractRequest $request
      * @return void
      * @throws \hiapi\nicru\exceptions\NicRuException
      * @static
@@ -83,10 +83,10 @@ class NicRuErrorParser
     }
 
     /**
-     * Generate exception
+     * Throw the package exception mapped to the NIC.ru state code.
      *
-     * @var int $state
-     * @var string $message
+     * @param int $state
+     * @param string $message
      * @return void
      * @throws \hiapi\nicru\exceptions\NicRuException
      * @static
