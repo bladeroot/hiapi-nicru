@@ -25,6 +25,8 @@ use hiapi\nicru\exceptions\RequiredParamMissingException;
  */
 class NicRuTool extends \hiapi\components\AbstractTool
 {
+    private const READABLE_PROPERTIES = ['url'];
+
     /** @var string */
     protected $url;
 
@@ -85,14 +87,29 @@ class NicRuTool extends \hiapi\components\AbstractTool
     }
 
     /**
-     * Expose protected configuration fields for request builders.
+     * Expose only non-sensitive configuration fields.
      *
      * @param string $name
      * @return mixed
+     * @throws \OutOfBoundsException
      */
     public function __get($name)
     {
-        return $this->{$name};
+        if (in_array($name, self::READABLE_PROPERTIES, true) && property_exists($this, $name)) {
+            return $this->{$name};
+        }
+
+        throw new \OutOfBoundsException("Property `$name` is not readable");
+    }
+
+    /**
+     * Return NIC.ru request credentials for internal request builders.
+     *
+     * @return array
+     */
+    public function getRequestData(): array
+    {
+        return $this->data;
     }
 
     /**

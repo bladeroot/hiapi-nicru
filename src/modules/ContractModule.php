@@ -30,7 +30,7 @@ class ContractModule extends AbstractModule implements ObjectModuleInterface
     public function contractInfo(array $row) : array
     {
         unset($row['contract']);
-        $request = new ContractInfoRequest($this->tool->data, $row);
+        $request = new ContractInfoRequest($this->tool->getRequestData(), $row);
         return $this->post($request);
     }
 
@@ -44,7 +44,7 @@ class ContractModule extends AbstractModule implements ObjectModuleInterface
     public function contractsSearch($rows = []) : array
     {
         unset($rows['contract']);
-        $request = new ContractsSearchRequest($this->tool->data, $rows);
+        $request = new ContractsSearchRequest($this->tool->getRequestData(), $rows);
         return $this->post($request);
     }
 }

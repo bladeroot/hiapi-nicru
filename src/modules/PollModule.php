@@ -31,7 +31,7 @@ class PollModule extends AbstractModule implements ObjectModuleInterface
         foreach (['ok', 'expired', 'outgoing'] as $state) {
             $domains = $this->base->domainsSearchForPolls([
                 'status' => $state,
-                'access_id' => $this->tool->data['id'],
+                'access_id' => $this->tool->getRequestData()['id'],
             ]);
 
             if (empty($domains)) {
@@ -147,10 +147,10 @@ class PollModule extends AbstractModule implements ObjectModuleInterface
         return array_merge([
             'class' => 'domain',
             'name' => $row['domain'],
-            'request_client' => $this->tool->data['name'],
+            'request_client' => $this->tool->getRequestData()['name'],
             'request_date' => date("Y-m-d H:i:s"),
             'action_date' => date("Y-m-d H:i:s"),
-            'action_client' => $this->tool->data['name'],
+            'action_client' => $this->tool->getRequestData()['name'],
             'outgoing' => $outgoing,
         ], $data);
     }

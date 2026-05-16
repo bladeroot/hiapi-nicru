@@ -67,7 +67,7 @@ class DomainModule extends AbstractModule implements ObjectModuleInterface
      */
     public function domainsLoadNicRu($rows = []) : array
     {
-        $request = new ServicesSearchRequest($this->tool->data, [
+        $request = new ServicesSearchRequest($this->tool->getRequestData(), [
             'service' => 'domain',
         ]);
         $result = $this->post($request);
@@ -112,7 +112,7 @@ class DomainModule extends AbstractModule implements ObjectModuleInterface
      */
     protected function domainInfo(array $row): array
     {
-        $request = new DomainInfoRequest($this->tool->data, $row);
+        $request = new DomainInfoRequest($this->tool->getRequestData(), $row);
         $res = $this->post($request);
         return array_merge($this->_domainPostParseRequest($res), $row);
     }
@@ -136,7 +136,7 @@ class DomainModule extends AbstractModule implements ObjectModuleInterface
             }
         }
 
-        $request = new DomainUpdateRequest($this->tool->data, $_row);
+        $request = new DomainUpdateRequest($this->tool->getRequestData(), $_row);
         $res = $this->post($request);
         $order = new OrderModule($this->tool);
         $res = $order->orderInfo(['order_id' => $res['order_id']]);
@@ -164,7 +164,7 @@ class DomainModule extends AbstractModule implements ObjectModuleInterface
      */
     protected function domainRenew(array $row) : array
     {
-        $request = new DomainRenewRequest($this->tool->data, $row);
+        $request = new DomainRenewRequest($this->tool->getRequestData(), $row);
         $res = $this->post($request);
         $order = new OrderModule($this->tool);
         $res = $order->orderInfo(['order_id' => $res['order_id']]);
@@ -255,7 +255,7 @@ class DomainModule extends AbstractModule implements ObjectModuleInterface
             ]);
         }
 
-        $request = new DomainWPRequest($this->tool->data, $row);
+        $request = new DomainWPRequest($this->tool->getRequestData(), $row);
         try {
             $res = $this->post($request);
         } catch (\Exception $e) {

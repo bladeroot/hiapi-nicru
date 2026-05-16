@@ -75,7 +75,7 @@ class HostModule extends AbstractModule implements ObjectModuleInterface
      */
     protected function hostInfo(array $row): array
     {
-        $request = new HostInfoRequest($this->tool->data, $row);
+        $request = new HostInfoRequest($this->tool->getRequestData(), $row);
         $res = $this->post($request);
         $res['exists'] = !empty($res);
         return $res;
@@ -111,7 +111,7 @@ class HostModule extends AbstractModule implements ObjectModuleInterface
      */
     protected function hostDelete(array $row) : array
     {
-        $request = new HostDeleteRequest($this->tool->data, $row);
+        $request = new HostDeleteRequest($this->tool->getRequestData(), $row);
         return $this->post($request);
     }
 
@@ -126,9 +126,9 @@ class HostModule extends AbstractModule implements ObjectModuleInterface
     {
         $info = $this->hostInfo($row);
         if ($info['exists']) {
-            $request = new HostUpdateRequest($this->tool->data, $row);
+            $request = new HostUpdateRequest($this->tool->getRequestData(), $row);
         } else {
-            $request = new HostCreateRequest($this->tool->data, $row);
+            $request = new HostCreateRequest($this->tool->getRequestData(), $row);
         }
 
         return reset($this->post($request));
